@@ -62,13 +62,13 @@ const withStatus = (blocks = [], text) => [
 async function openCommentModal({ ack, body, action, client, requireComment }) {
   await ack();
 
-  const { taskId, action: decision, userEmail } = JSON.parse(action.value || '{}');
+  const { taskId, action: decision, userEmail, invoiceNumber } = JSON.parse(action.value || '{}');
 
   // capture parent blocks WITHOUT buttons so we can remove them later
   const parentNoActions = withoutActions(body.message?.blocks || []);
 
   const privateMeta = {
-    taskId, decision, userEmail,
+    taskId, decision, userEmail, invoiceNumber,
     channelId: body.channel.id,
     messageTs: body.message.ts,
     clickedBy: body.user.id,
@@ -87,7 +87,7 @@ async function openCommentModal({ ack, body, action, client, requireComment }) {
       blocks: [
         {
           type: 'section',
-          text: { type: 'mrkdwn', text: `You are about to *${decision}* task *${taskId}*.` }
+          text: { type: 'mrkdwn', text: `You are about to *${decision}* task *${invoiceNumber}*.` }
         },
         {
           type: 'input',
@@ -132,7 +132,7 @@ app.view('approval_comment_view', async ({ ack, body, view, client, logger }) =>
     processing = await client.chat.postMessage({
       channel: meta.channelId,
       thread_ts: meta.messageTs,
-      text: `Please wait while we process *${meta.decision}* action for *${meta.taskId}* by <@${meta.clickedBy}>…`
+      text: `Please wait while we process *${meta.decision}* action for *${meta.invoiceNumber}* by <@${meta.clickedBy}>…`
     });
   } catch (e) {
     logger.warn('Pre-status reply failed: ' + e.message);
@@ -216,13 +216,13 @@ else if (statusLC === 'moreinfo') {
     await client.chat.update({
       channel: meta.channelId,
       ts: processing.ts,
-      text: `❌ *${meta.decision}* failed for *${meta.taskId}*: ${errText}`
+      text: `❌ *${meta.decision}* failed for *${meta.invoiceNumber}*: ${errText}`
     });
   } else {
     await client.chat.postMessage({
       channel: meta.channelId,
       thread_ts: meta.messageTs,
-      text: `❌ *${meta.decision}* failed for *${meta.taskId}*: ${errText}`
+      text: `❌ *${meta.decision}* failed for *${meta.invoiceNumber}*: ${errText}`
     });
   }
   logger.error('OIC call failed: ' + errText);

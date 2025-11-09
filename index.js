@@ -87,7 +87,7 @@ async function openCommentModal({ ack, body, action, client, requireComment }) {
       blocks: [
         {
           type: 'section',
-          text: { type: 'mrkdwn', text: `You are about to *${decision}* task *${invoiceNumber}*.` }
+          text: { type: 'mrkdwn', text: `You are about to *${decision}* invoice *${invoiceNumber}*.` }
         },
         {
           type: 'input',
